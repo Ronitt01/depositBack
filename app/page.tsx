@@ -1,10 +1,10 @@
-import HeroSwitcher from "@/components/hero/HeroSwitcher";
+import HeroStage from "@/components/hero/HeroStage";
 import Tool from "@/components/tool/Tool";
 
 export default function Home() {
   return (
     <main className="relative">
-      <HeroSwitcher />
+      <HeroStage />
 
       <div className="relative z-10 bg-paper">
         <Tool />
