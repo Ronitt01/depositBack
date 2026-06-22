@@ -214,6 +214,11 @@ export default function Hero() {
   const finaleCurrency = useTransform(sp, [0.9, 0.96], [0, 1]);
   const finaleCta = useTransform(sp, [0.93, 0.99], [0, 1]);
   const rupeeMix = useTransform(sp, [0.95, 1], [0, 1]);
+  // Hoisted out of JSX: these MUST be called every render (the `!mounted` early
+  // return below would otherwise change the hook count and crash the component).
+  const finaleAY = useTransform(finaleA, [0, 1], [22, 0]);
+  const finaleBY = useTransform(finaleB, [0, 1], [16, 0]);
+  const finaleCtaY = useTransform(finaleCta, [0, 1], [18, 0]);
 
   const strikeProgress = (rowIndex: number) => {
     const start = 0.52 + rowIndex * 0.05;
@@ -505,10 +510,10 @@ export default function Hero() {
         <motion.div className="absolute inset-0 z-30 flex flex-col items-center justify-end pb-[12vh]" style={{ opacity: finale }}>
           <div className="flex flex-col items-center text-center">
             <h2 className="font-display text-ink" style={{ fontSize: "clamp(34px, 6vw, 64px)", lineHeight: 1.04, letterSpacing: "-0.015em" }}>
-              <motion.span className="inline-block" style={{ opacity: finaleA, y: useTransform(finaleA, [0, 1], [22, 0]) }}>
+              <motion.span className="inline-block" style={{ opacity: finaleA, y: finaleAY }}>
                 Get back every dollar.
               </motion.span>{" "}
-              <motion.span className="inline-block italic text-gold" style={{ opacity: finaleB, y: useTransform(finaleB, [0, 1], [16, 0]) }}>
+              <motion.span className="inline-block italic text-gold" style={{ opacity: finaleB, y: finaleBY }}>
                 And every rupee.
               </motion.span>
             </h2>
@@ -518,7 +523,7 @@ export default function Hero() {
             <motion.a
               href="#tool"
               className="group pointer-events-auto relative mt-7 inline-flex items-center gap-2 overflow-hidden rounded-full bg-emerald-deep px-7 py-3.5 text-base font-semibold tracking-[0.005em] text-paper shadow-[0_14px_44px_rgba(14,94,60,0.4)]"
-              style={{ opacity: finaleCta, y: useTransform(finaleCta, [0, 1], [18, 0]) }}
+              style={{ opacity: finaleCta, y: finaleCtaY }}
               whileHover={{ y: -2 }}
               transition={{ type: "spring", stiffness: 320, damping: 18 }}
             >

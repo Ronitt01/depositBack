@@ -5,12 +5,40 @@
    Both are loaded client-only (ssr:false) — only the selected one mounts. */
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const HeroMolten = dynamic(() => import("./HeroMolten"), { ssr: false });
 const HeroReckoning = dynamic(() => import("./HeroReckoning"), { ssr: false });
 
 type Variant = "molten" | "reckoning";
+
+/* Isolates a hero crash so it can never take the whole page down — the toggle
+   stays usable and a calm fallback shows instead of a blank/error screen.
+   Resets automatically when you switch variants (keyed by `variant`). */
+class HeroErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(err: unknown) {
+    console.error("Hero variant failed to render:", err);
+  }
+  render() {
+    if (this.state.failed) {
+      return (
+        <section className="flex h-screen w-full flex-col items-center justify-center bg-paper px-6 text-center">
+          <span className="mb-4 inline-block h-4 w-4 rotate-45 rounded-[3px] bg-gradient-to-br from-gold-bright to-gold" />
+          <h1 className="font-display text-3xl text-ink sm:text-4xl">Get back every dollar.</h1>
+          <p className="mt-2 text-sm text-muted">This hero hit a snag — try the other one below, or scroll to the tool.</p>
+        </section>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const OPTIONS: { id: Variant; label: string }[] = [
   { id: "molten", label: "Molten Verdict" },
@@ -35,7 +63,9 @@ export default function HeroSwitcher() {
 
   return (
     <div className="relative">
-      {variant === "molten" ? <HeroMolten /> : <HeroReckoning />}
+      <HeroErrorBoundary key={variant}>
+        {variant === "molten" ? <HeroMolten /> : <HeroReckoning />}
+      </HeroErrorBoundary>
 
       {/* floating A/B toggle */}
       <div className="fixed bottom-5 right-5 z-[60] flex items-center gap-1 rounded-full border border-line bg-white/85 p-1 shadow-[0_2px_6px_rgba(21,35,28,0.06),0_20px_50px_rgba(21,35,28,0.12)] backdrop-blur">
