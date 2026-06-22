@@ -1,26 +1,169 @@
 @import "tailwindcss";
 
+/* ───────────────────────── DepositBack — light, premium theme ─────────────────────────
+   Warm paper background, deep green-ink text, crisp white cards.
+   Gold = your money coming back. Emerald = the law on your side. */
+
+@theme {
+  --color-paper: #f4f1e9; /* warm paper */
+  --color-paper-2: #ece7db; /* deeper paper for bands */
+  --color-card: #ffffff;
+
+  --color-ink: #15231c; /* deep green-ink */
+  --color-ink-soft: #36473e;
+  --color-muted: #6c7a71;
+  --color-line: #e2ddcf; /* hairline border */
+
+  --color-gold: #b07d16;
+  --color-gold-bright: #e3ad3c;
+  --color-gold-soft: #f6e9c8;
+
+  --color-emerald: #1c885a;
+  --color-emerald-deep: #0e5e3c;
+  --color-emerald-soft: #e0f1e7;
+
+  --color-danger: #cf3a2c;
+  --color-danger-soft: #fbe4e0;
+  --color-amber: #c9881a;
+  --color-amber-soft: #f8edcf;
+  --color-sky: #8fc0d6;
+
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-soft: 0 1px 2px rgba(21, 35, 28, 0.04), 0 8px 30px rgba(21, 35, 28, 0.06);
+  --shadow-lift: 0 2px 6px rgba(21, 35, 28, 0.06), 0 20px 50px rgba(21, 35, 28, 0.1);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  border-color: var(--color-line);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-gold-soft);
+  color: var(--color-ink);
+}
+
+/* Utilities ----------------------------------------------------------------- */
+
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Form inputs across the tool. */
+.input {
+  width: 100%;
+  border-radius: 0.6rem;
+  border: 1px solid var(--color-line);
+  background: #fcfbf7;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input::placeholder {
+  color: #a9b2ab;
+}
+.input:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px var(--color-gold-soft);
+}
+
+/* Frosted card used across the tool. */
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-soft);
+}
+
+/* Subtle paper grain so big light areas don't feel flat. */
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Thin elegant scrollbar. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cfc8b6;
+  border-radius: 99px;
+  border: 3px solid var(--color-paper);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b8b09a;
+}
+
+/* Reveal-on-scroll helper (used by the tool sections). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Slow gold shimmer for the headline underline. */
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Count-up numbers and the verdict figure use tabular digits. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .print-letter {
+    box-shadow: none !important;
+    border: none !important;
+  }
 }
