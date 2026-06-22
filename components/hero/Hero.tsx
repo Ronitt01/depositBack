@@ -13,6 +13,7 @@ import {
 import * as THREE from "three";
 import { buildRiverCurve, buildTerrainGeometry } from "./terrainGeo";
 import { Painterly } from "./effects";
+import { CanvasBoundary } from "./CanvasBoundary";
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
@@ -304,14 +305,16 @@ export default function Hero() {
     <section ref={heroRef} className="relative" style={{ height: "460vh" }}>
       <div className="sticky top-0 h-screen w-full overflow-hidden" style={{ background: "linear-gradient(180deg,#bfe0ef 0%,#d4e8d6 55%,#eef3e0 100%)" }}>
         {mounted && (
-          <Canvas
-            className="absolute inset-0"
-            gl={{ antialias: true, powerPreference: "high-performance" }}
-            camera={{ fov: 52, near: 0.1, far: 460, position: [0, 12, 34] }}
-            dpr={[1, 2]}
-          >
-            <Scene progress={progress} pointer={pointer} />
-          </Canvas>
+          <CanvasBoundary>
+            <Canvas
+              className="absolute inset-0"
+              gl={{ antialias: true, powerPreference: "high-performance" }}
+              camera={{ fov: 52, near: 0.1, far: 460, position: [0, 12, 34] }}
+              dpr={[1, 2]}
+            >
+              <Scene progress={progress} pointer={pointer} />
+            </Canvas>
+          </CanvasBoundary>
         )}
 
         <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(60% 50% at 50% 45%, rgba(10,30,20,0.20), transparent 70%)" }} />
