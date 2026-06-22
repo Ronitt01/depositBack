@@ -7,14 +7,15 @@ import { buildRiverCurve, buildTerrainGeometry } from "./terrainGeo";
 import { CanvasBoundary } from "./CanvasBoundary";
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-const SUN: [number, number, number] = [18, 46, -72];
+const SUN: [number, number, number] = [12, 32, -62];
 
-/* ── camera keyframes (descend and fly through the valley) ─────────────── */
+/* ── camera keyframes: fly LOW through the channel, looking slightly UP so the
+   canyon walls fill the left/right of the frame and the sun glows in the gap ahead ── */
 const CAM: { pos: [number, number, number]; tgt: [number, number, number] }[] = [
-  { pos: [0, 11, 33], tgt: [0, 3, 2] },
-  { pos: [-7, 6.5, 16], tgt: [3, 2.0, -10] },
-  { pos: [5.5, 3.2, 2], tgt: [-3, 1.6, -20] },
-  { pos: [0, 2.0, -12], tgt: [0, 1.4, -38] },
+  { pos: [0, 3.3, 22], tgt: [0, 6.2, -26] },
+  { pos: [-0.7, 3.1, 8], tgt: [0.9, 5.8, -34] },
+  { pos: [0.7, 2.9, -8], tgt: [-0.9, 5.4, -42] },
+  { pos: [0, 2.8, -20], tgt: [0, 5.0, -54] },
 ];
 function sampleCam(p: number) {
   const n = CAM.length - 1;
@@ -99,7 +100,7 @@ const TERRAIN_FRAG = /* glsl */ `
 
     // cool atmospheric distance (pushed far so near terrain stays green)
     float d = length(vWorld - cameraPosition);
-    float haze = smoothstep(60.0, 190.0, d) * 0.8;
+    float haze = smoothstep(85.0, 230.0, d) * 0.7;
     col = mix(col, vec3(0.60,0.72,0.82), haze);
 
     // painterly stylise: banded posterise + saturation + contrast
@@ -123,15 +124,17 @@ function Terrain() {
 
 /* glowing golden "deposit" river — core ribbon + soft additive halo (fake bloom) */
 function River({ curve }: { curve: THREE.CatmullRomCurve3 }) {
-  const core = useMemo(() => new THREE.TubeGeometry(curve, 260, 0.5, 12, false), [curve]);
-  const halo = useMemo(() => new THREE.TubeGeometry(curve, 260, 1.5, 12, false), [curve]);
+  const core = useMemo(() => new THREE.TubeGeometry(curve, 260, 0.42, 12, false), [curve]);
+  const halo = useMemo(() => new THREE.TubeGeometry(curve, 260, 0.95, 12, false), [curve]);
   return (
     <group>
+      {/* soft additive halo for a faint glow along the banks */}
       <mesh geometry={halo}>
-        <meshBasicMaterial color={"#ffcf72"} transparent opacity={0.16} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial color={"#ffcf6e"} transparent opacity={0.14} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} />
       </mesh>
+      {/* solid molten-gold core (normal blending so it never blows out to white) */}
       <mesh geometry={core}>
-        <meshBasicMaterial color={"#fff0c2"} transparent opacity={0.95} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} />
+        <meshBasicMaterial color={"#e8a52a"} toneMapped={false} />
       </mesh>
     </group>
   );
@@ -236,11 +239,11 @@ function CameraRig({ progress, pointer }: { progress: React.RefObject<number>; p
   const tgt = useMemo(() => new THREE.Vector3(), []);
   useFrame((state) => {
     const { pos, tgt: t } = sampleCam(progress.current ?? 0);
-    const sway = Math.sin(state.clock.elapsedTime * 0.22) * 0.4;
+    const sway = Math.sin(state.clock.elapsedTime * 0.22) * 0.25;
     const px = pointer.current?.x ?? 0;
     const py = pointer.current?.y ?? 0;
-    camera.position.set(pos[0] + px * 1.6 + sway, pos[1] - py * 1.0, pos[2]);
-    tgt.set(t[0] + px * 1.2, t[1] - py * 0.6, t[2]);
+    camera.position.set(pos[0] + px * 0.8 + sway, pos[1] - py * 0.6, pos[2]);
+    tgt.set(t[0] + px * 0.9, t[1] - py * 0.5, t[2]);
     camera.lookAt(tgt);
   });
   return null;
@@ -328,7 +331,7 @@ export default function Hero() {
             <Canvas
               className="absolute inset-0"
               gl={{ antialias: true, powerPreference: "high-performance" }}
-              camera={{ fov: 52, near: 0.1, far: 460, position: [0, 11, 33] }}
+              camera={{ fov: 48, near: 0.1, far: 460, position: [0, 6, 24] }}
               dpr={[1, 2]}
             >
               <Scene progress={progress} pointer={pointer} />

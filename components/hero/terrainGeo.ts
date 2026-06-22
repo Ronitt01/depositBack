@@ -33,15 +33,19 @@ function fbm(x: number, z: number): number {
 }
 
 export function terrainHeight(x: number, z: number): number {
-  // 0 in the central valley → 1 out on the flanks.
-  const flank = THREE.MathUtils.smoothstep(Math.abs(x), 5, 30);
-  const ridge = Math.pow(flank, 1.35) * 30; // tall, dramatic peaks
-  const detail = fbm(x * 0.05 + 10, z * 0.04 + 5) * (2.4 + Math.pow(flank, 1.5) * 11);
+  // Narrow flat channel (|x|<2.5, ~y≈0) for the camera + golden river, with walls that
+  // rise steeply and CLOSE so the camera — flying low between them — sees them fill the
+  // left and right of the frame (EverSwap-style canyon flythrough).
+  const ax = Math.abs(x);
+  const flank = THREE.MathUtils.smoothstep(ax, 2.5, 8.5);
+  const ridge = Math.pow(flank, 1.05) * 34;
+  // keep the channel floor calm so the camera never clips it; detail grows on the flanks
+  const detail = fbm(x * 0.06 + 10, z * 0.045 + 5) * (1.2 + Math.pow(flank, 1.4) * 9);
   // sharp diagonal creases on the flanks (ridgelines)
-  const crease = Math.abs(fbm(x * 0.09 + 3, z * 0.08 + 7) - 0.5) * 2;
-  const sharp = (1 - crease) * flank * 7;
-  const bumps = fbm(x * 0.14, z * 0.12) * 1.3;
-  return ridge + detail + sharp + bumps - 2;
+  const crease = Math.abs(fbm(x * 0.1 + 3, z * 0.085 + 7) - 0.5) * 2;
+  const sharp = (1 - crease) * flank * 6;
+  const bumps = fbm(x * 0.15, z * 0.12) * 0.7;
+  return ridge + detail + sharp + bumps - 0.8;
 }
 
 const W = 96;
@@ -80,8 +84,8 @@ export function buildTerrainGeometry(): THREE.BufferGeometry {
 export function buildRiverCurve(): THREE.CatmullRomCurve3 {
   const pts: THREE.Vector3[] = [];
   for (let z = NEAR_Z - 4; z > -185; z -= 4) {
-    const x = Math.sin(z * 0.06) * 4.2 + Math.sin(z * 0.135) * 1.8;
-    const y = terrainHeight(x, z) + 0.35;
+    const x = Math.sin(z * 0.05) * 1.0 + Math.sin(z * 0.11) * 0.4; // gentle meander, stays inside the channel
+    const y = terrainHeight(x, z) + 0.3;
     pts.push(new THREE.Vector3(x, y, z));
   }
   const c = new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.5);
