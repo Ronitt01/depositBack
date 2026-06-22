@@ -33,10 +33,15 @@ function fbm(x: number, z: number): number {
 }
 
 export function terrainHeight(x: number, z: number): number {
-  const ridge = THREE.MathUtils.smoothstep(Math.abs(x), 7, 36) * 16; // flanks rise into peaks
-  const detail = fbm(x * 0.05 + 10, z * 0.04 + 5) * (2.2 + (ridge / 16) * 7);
-  const bumps = fbm(x * 0.13, z * 0.11) * 1.3;
-  return ridge + detail + bumps - 1.6;
+  // 0 in the central valley → 1 out on the flanks.
+  const flank = THREE.MathUtils.smoothstep(Math.abs(x), 5, 30);
+  const ridge = Math.pow(flank, 1.35) * 30; // tall, dramatic peaks
+  const detail = fbm(x * 0.05 + 10, z * 0.04 + 5) * (2.4 + Math.pow(flank, 1.5) * 11);
+  // sharp diagonal creases on the flanks (ridgelines)
+  const crease = Math.abs(fbm(x * 0.09 + 3, z * 0.08 + 7) - 0.5) * 2;
+  const sharp = (1 - crease) * flank * 7;
+  const bumps = fbm(x * 0.14, z * 0.12) * 1.3;
+  return ridge + detail + sharp + bumps - 2;
 }
 
 const W = 96;
